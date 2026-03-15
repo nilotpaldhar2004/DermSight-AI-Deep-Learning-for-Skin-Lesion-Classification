@@ -51,12 +51,13 @@
                         <span id="btnText">Execute Inference</span>
                         <div id="spinner" class="loader hidden"></div>
                     </button>
+                    <p id="wakeupHint" class="hidden text-[10px] text-center mt-3 text-blue-500 font-medium">Initial analysis may take 30s as the cloud engine wakes up...</p>
                 </div>
                 <div class="bg-red-50 border border-red-100 p-5 rounded-2xl">
                     <div class="flex space-x-3">
                         <span class="text-red-500 font-bold">!</span>
                         <p class="text-[11px] text-red-800 leading-relaxed font-medium">
-                            <strong>RESTRICTED USE:</strong> Optimized for dermoscopic textures only. Performance on non-clinical imagery is undefined.
+                            <strong>RESTRICTED USE:</strong> Optimized for HAM10000 dermoscopic textures. Results are for research demonstration only.
                         </p>
                     </div>
                 </div>
@@ -94,136 +95,107 @@
 
         <hr class="border-slate-200 mb-16">
 
-        <div id="documentation" class="mb-16">
-            <h2 class="text-2xl font-extrabold mb-8">Project Documentation</h2>
-            <div class="grid md:grid-cols-2 gap-12">
-                <div class="space-y-6">
-                    <div>
-                        <h4 class="text-blue-600 font-bold text-sm uppercase tracking-wider mb-2">The Challenge</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">Skin cancer detection relies heavily on identifying microscopic visual patterns. This project bridges the gap between raw medical data and clinical insight using Deep Learning to categorize lesions from the HAM10000 dataset.</p>
-                    </div>
-                    <div>
-                        <h4 class="text-blue-600 font-bold text-sm uppercase tracking-wider mb-2">Preprocessing Pipeline</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">Images undergo a specific transformation pipeline: initial resizing to 224x224 pixels, conversion to Tensors, and normalization using ImageNet means ($\mu$) and standard deviations ($\sigma$).</p>
-                    </div>
-                </div>
-                <div class="glass-panel p-6 rounded-3xl">
-                    <h4 class="font-bold text-sm mb-4">🔬 ABCD Assessment Guide</h4>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-3 text-xs">
-                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">A</span>
-                            <p><strong>Asymmetry:</strong> One half of the lesion does not match the other half.</p>
-                        </div>
-                        <div class="flex items-start space-x-3 text-xs">
-                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">B</span>
-                            <p><strong>Borders:</strong> Edges are irregular, notched, or blurred.</p>
-                        </div>
-                        <div class="flex items-start space-x-3 text-xs">
-                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">C</span>
-                            <p><strong>Color:</strong> Pigmentation is not uniform.</p>
-                        </div>
-                        <div class="flex items-start space-x-3 text-xs">
-                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">D</span>
-                            <p><strong>Diameter:</strong> Lesion is greater than 6mm.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="model-specs" class="bg-slate-900 rounded-3xl p-10 text-white">
+        <div id="model-specs" class="bg-slate-900 rounded-3xl p-10 text-white mb-16">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
                 <div>
                     <h2 class="text-2xl font-extrabold mb-2">Technical Specifications</h2>
-                    <p class="text-slate-400 text-sm">Model Architecture & Deployment Environment</p>
+                    <p class="text-slate-400 text-sm">FP16 Half-Precision Optimized Model</p>
                 </div>
                 <div class="mt-4 md:mt-0 px-4 py-2 bg-slate-800 rounded-full border border-slate-700 text-[10px] font-mono">
-                    STATUS: PRODUCTION_READY
+                    RUNTIME: RENDER_FREE_TIER_CPU
                 </div>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="border-l border-slate-700 pl-6">
-                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Base Backbone</p>
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Architecture</p>
                     <p class="text-xl font-bold">ResNet-50</p>
                 </div>
                 <div class="border-l border-slate-700 pl-6">
-                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Output Layers</p>
-                    <p class="text-xl font-bold">Sequential [4]</p>
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Model Size</p>
+                    <p class="text-xl font-bold">52 MB</p>
                 </div>
                 <div class="border-l border-slate-700 pl-6">
-                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Input Dim</p>
-                    <p class="text-xl font-bold">224 x 224</p>
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Optimization</p>
+                    <p class="text-xl font-bold">Float16</p>
                 </div>
                 <div class="border-l border-slate-700 pl-6">
-                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Backend</p>
-                    <p class="text-xl font-bold">FastAPI</p>
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Dataset</p>
+                    <p class="text-xl font-bold">HAM10000</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CHANGE THIS TO YOUR ACTUAL RENDER URL
-        const RENDER_URL = 'https://YOUR-APP-NAME.onrender.com';
+        // 1. UPDATE THIS URL TO YOUR ACTUAL RENDER URL
+        const RENDER_URL = 'https://dermsight-ai-deep-learning-for-skin.onrender.com';
 
         const descriptions = {
             'nv': 'Melanocytic Nevi: A benign neoplasm of melanocytes. Common in adult populations, regular monitoring recommended.',
-            'mel': 'Melanoma: A malignant tumor arising from melanocytes. High risk of metastasis. Surgical consultation is priority.',
-            'bkl': 'Benign Keratosis: Often referred to as "seborrheic keratosis." Non-cancerous skin growth common with aging.',
-            'bcc': 'Basal Cell Carcinoma: Most common form of skin cancer. Slow-growing, rarely metastasizes but invasive.',
-            'akiec': 'Actinic Keratoses: Pre-cancerous skin lesions typically caused by prolonged ultraviolet (UV) exposure.',
-            'vasc': 'Vascular Lesions: Includes cherry angiomas and angiokeratomas. Typically benign blood-vessel related growths.',
-            'df': 'Dermatofibroma: A common benign fibrous nodule, often found on the lower extremities.'
+            'mel': 'Melanoma: A malignant tumor arising from melanocytes. High risk of metastasis. Urgent surgical consultation is required.',
+            'bkl': 'Benign Keratosis: Including seborrheic keratoses and lichen-planus like keratoses. Generally non-cancerous.',
+            'bcc': 'Basal Cell Carcinoma: A common, slow-growing form of skin cancer. Locally invasive but rarely spreads.',
+            'akiec': 'Actinic Keratoses: Pre-cancerous lesions caused by sun damage. Can develop into squamous cell carcinoma.',
+            'vasc': 'Vascular Lesions: Includes angiomas and pyogenic granulomas. Usually benign blood-vessel related growths.',
+            'df': 'Dermatofibroma: A benign fibrous nodule often found on limbs, frequently following minor skin trauma.'
         };
 
         function previewImage(event) {
             const preview = document.getElementById('preview');
             const placeholder = document.getElementById('uploadPlaceholder');
-            preview.src = URL.createObjectURL(event.target.files[0]);
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
+            if (event.target.files[0]) {
+                preview.src = URL.createObjectURL(event.target.files[0]);
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
         }
 
         async function uploadImage() {
             const input = document.getElementById('imageInput');
             const btn = document.getElementById('submitBtn');
             const spinner = document.getElementById('spinner');
+            const hint = document.getElementById('wakeupHint');
             const resPlaceholder = document.getElementById('resultPlaceholder');
             const resCard = document.getElementById('resultCard');
 
-            if (!input.files[0]) return alert("Data input required.");
+            if (!input.files[0]) return alert("Please upload an image first.");
 
+            // UI State Change
             btn.disabled = true;
-            document.getElementById('btnText').innerText = "Analyzing Tensor Data...";
+            document.getElementById('btnText').innerText = "Processing Tensor...";
             spinner.classList.remove('hidden');
+            hint.classList.remove('hidden');
 
             const formData = new FormData();
             formData.append('file', input.files[0]);
 
             try {
-                // Pointing to Render instead of local path
+                // Fetch call to your Render Backend
                 const response = await fetch(`${RENDER_URL}/predict`, { 
                     method: 'POST', 
                     body: formData 
                 });
                 
-                if (!response.ok) throw new Error("Server Error");
+                if (!response.ok) throw new Error("Cloud Engine Timeout/Error");
                 
                 const data = await response.json();
                 
+                // Show Result Card
                 resPlaceholder.classList.add('hidden');
                 resCard.classList.remove('hidden');
                 
-                const mainPred = data.prediction.toLowerCase();
+                const mainPred = data.prediction; // matches key in 'descriptions'
                 const mainConf = parseFloat(data.confidence);
                 
+                // Update Main Displays
                 document.getElementById('predictionText').innerText = mainPred;
-                document.getElementById('confidenceText').innerText = mainConf.toFixed(2) + "%";
-                document.getElementById('descText').innerText = descriptions[mainPred] || 'Diagnosis complete.';
+                document.getElementById('confidenceText').innerText = mainConf.toFixed(1) + "%";
+                document.getElementById('descText').innerText = descriptions[mainPred.toLowerCase()] || 'Classification successful.';
                 
+                // Priority Badge Logic
                 const badge = document.getElementById('statusBadge');
-                if(['mel', 'bcc', 'akiec'].includes(mainPred)) {
+                if(['mel', 'bcc', 'akiec'].includes(mainPred.toLowerCase())) {
                     badge.innerText = 'High Priority';
                     badge.className = 'absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase bg-red-100 text-red-600';
                 } else {
@@ -231,37 +203,36 @@
                     badge.className = 'absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase bg-green-100 text-green-600';
                 }
 
+                // Probability Bar Generation
                 const barsContainer = document.getElementById('probabilityBars');
                 barsContainer.innerHTML = '';
                 
-                // Use REAL probabilities from our updated main.py
                 const all_probs = data.all_probabilities;
-                Object.keys(all_probs).forEach(cls => {
-                    const val = all_probs[cls].toFixed(1);
-                    const isWinner = cls.toLowerCase() === mainPred;
+                Object.entries(all_probs).forEach(([cls, val]) => {
+                    const probValue = parseFloat(val).toFixed(1);
+                    const isWinner = cls.toLowerCase() === mainPred.toLowerCase();
                     
                     barsContainer.innerHTML += `
                         <div class="flex items-center text-[10px]">
                             <span class="w-10 font-bold text-slate-500 uppercase">${cls}</span>
                             <div class="flex-1 h-1.5 bg-slate-100 rounded-full mx-3 overflow-hidden">
-                                <div class="probability-bar h-full ${isWinner ? 'bg-blue-600' : 'bg-slate-300'}" style="width: ${val}%"></div>
+                                <div class="probability-bar h-full ${isWinner ? 'bg-blue-600' : 'bg-slate-300'}" style="width: ${probValue}%"></div>
                             </div>
-                            <span class="w-8 text-right font-mono text-slate-400">${val}%</span>
+                            <span class="w-8 text-right font-mono text-slate-400">${probValue}%</span>
                         </div>
                     `;
                 });
 
             } catch (error) {
                 console.error(error);
-                alert("Remote Inference Engine Offline. Please ensure the Render server is awake.");
+                alert("The AI engine is currently waking up or unavailable. Please try again in 20 seconds.");
             } finally {
                 btn.disabled = false;
                 document.getElementById('btnText').innerText = "Execute Inference";
                 spinner.classList.add('hidden');
+                hint.classList.add('hidden');
             }
         }
     </script>
 </body>
 </html>
-
-
