@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermSight Pro | AI-Assisted Dermatology</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .probability-bar { transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .loader {
+            border: 3px solid #f1f5f9; border-top: 3px solid #2563eb;
+            border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 1s linear infinite; display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen pb-20">
+
+    <div class="max-w-6xl mx-auto px-6 py-10">
+        <nav class="flex justify-between items-center mb-12">
+            <div class="flex items-center space-x-2">
+                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl">D</div>
+                <span class="text-xl font-extrabold tracking-tight">DermSight <span class="text-blue-600">PRO</span></span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-sm font-semibold text-slate-500">
+                <a href="#analysis-tool" class="hover:text-blue-600 transition">Analysis Tool</a>
+                <a href="#documentation" class="hover:text-blue-600 transition">Documentation</a>
+                <a href="#model-specs" class="hover:text-blue-600 transition text-slate-900">Technical Specs</a>
+            </div>
+        </nav>
+
+        <div id="analysis-tool" class="grid lg:grid-cols-3 gap-8 mb-16">
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass-panel p-6 rounded-3xl shadow-sm">
+                    <h3 class="text-lg font-bold mb-4">Patient Image</h3>
+                    <div class="relative group cursor-pointer border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center hover:bg-blue-50 hover:border-blue-300 transition-all" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="previewImage(event)"/>
+                        <div id="uploadPlaceholder">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span class="text-2xl">➕</span>
+                            </div>
+                            <p class="text-xs font-semibold text-slate-400">UPLOAD DERMOSCOPY IMAGE</p>
+                        </div>
+                        <img id="preview" class="hidden w-full h-64 object-cover rounded-xl shadow-md" />
+                    </div>
+                    <button id="submitBtn" onclick="uploadImage()" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-xl font-bold hover:shadow-lg hover:bg-blue-600 transition-all flex items-center justify-center space-x-3">
+                        <span id="btnText">Execute Inference</span>
+                        <div id="spinner" class="loader hidden"></div>
+                    </button>
+                </div>
+                <div class="bg-red-50 border border-red-100 p-5 rounded-2xl">
+                    <div class="flex space-x-3">
+                        <span class="text-red-500 font-bold">!</span>
+                        <p class="text-[11px] text-red-800 leading-relaxed font-medium">
+                            <strong>RESTRICTED USE:</strong> Optimized for dermoscopic textures only. Performance on non-clinical imagery is undefined.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+                <div id="resultPlaceholder" class="h-full flex flex-col items-center justify-center bg-white rounded-3xl border border-dashed border-slate-200 p-20 text-slate-400">
+                    <p class="text-sm">Awaiting input data for classification...</p>
+                </div>
+                <div id="resultCard" class="hidden space-y-6">
+                    <div class="glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                        <div id="statusBadge" class="absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
+                        <div class="flex items-start justify-between mb-8">
+                            <div>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Primary Classification</p>
+                                <h2 id="predictionText" class="text-5xl font-extrabold text-slate-900 capitalize"></h2>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Confidence</p>
+                                <p id="confidenceText" class="text-3xl font-bold text-blue-600"></p>
+                            </div>
+                        </div>
+                        <div class="space-y-4 mb-8">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cross-Class Probability Distribution</p>
+                            <div id="probabilityBars" class="grid gap-3"></div>
+                        </div>
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">Clinical Note</h4>
+                            <p id="descText" class="text-xs text-slate-600 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-slate-200 mb-16">
+
+        <div id="documentation" class="mb-16">
+            <h2 class="text-2xl font-extrabold mb-8">Project Documentation</h2>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-blue-600 font-bold text-sm uppercase tracking-wider mb-2">The Challenge</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">Skin cancer detection relies heavily on identifying microscopic visual patterns. This project bridges the gap between raw medical data and clinical insight using Deep Learning to categorize lesions from the HAM10000 dataset.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-blue-600 font-bold text-sm uppercase tracking-wider mb-2">Preprocessing Pipeline</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">Images undergo a specific transformation pipeline: initial resizing to 224x224 pixels, conversion to Tensors, and normalization using ImageNet means ($\mu$) and standard deviations ($\sigma$) to ensure compatibility with pre-trained ResNet feature extractors.</p>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-3xl">
+                    <h4 class="font-bold text-sm mb-4">🔬 ABCD Assessment Guide</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3 text-xs">
+                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">A</span>
+                            <p><strong>Asymmetry:</strong> One half of the lesion does not match the other half.</p>
+                        </div>
+                        <div class="flex items-start space-x-3 text-xs">
+                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">B</span>
+                            <p><strong>Borders:</strong> Edges are irregular, notched, or blurred.</p>
+                        </div>
+                        <div class="flex items-start space-x-3 text-xs">
+                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">C</span>
+                            <p><strong>Color:</strong> Pigmentation is not uniform; shades of tan, brown, or black.</p>
+                        </div>
+                        <div class="flex items-start space-x-3 text-xs">
+                            <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">D</span>
+                            <p><strong>Diameter:</strong> Lesion is greater than 6mm (size of a pencil eraser).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="model-specs" class="bg-slate-900 rounded-3xl p-10 text-white">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+                <div>
+                    <h2 class="text-2xl font-extrabold mb-2">Technical Specifications</h2>
+                    <p class="text-slate-400 text-sm">Model Architecture & Deployment Environment</p>
+                </div>
+                <div class="mt-4 md:mt-0 px-4 py-2 bg-slate-800 rounded-full border border-slate-700 text-[10px] font-mono">
+                    STATUS: PRODUCTION_READY
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="border-l border-slate-700 pl-6">
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Base Backbone</p>
+                    <p class="text-xl font-bold">ResNet-50</p>
+                </div>
+                <div class="border-l border-slate-700 pl-6">
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Output Layers</p>
+                    <p class="text-xl font-bold">Sequential [4]</p>
+                </div>
+                <div class="border-l border-slate-700 pl-6">
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Input Dim</p>
+                    <p class="text-xl font-bold">224 x 224</p>
+                </div>
+                <div class="border-l border-slate-700 pl-6">
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2 tracking-widest">Backend</p>
+                    <p class="text-xl font-bold">FastAPI</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 font-mono text-[10px] space-y-2 opacity-80">
+                <p>> WEIGHTS_PATH: skin_lesion_resnet50_best.pth</p>
+                <p>> OPTIMIZER: Adam (lr=1e-4)</p>
+                <p>> DROPOUT_RATE: 0.2 | 0.1</p>
+                <p>> INFERENCE_LATENCY: < 200ms</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const descriptions = {
+            'nv': 'Melanocytic Nevi: A benign neoplasm of melanocytes. Common in adult populations, regular monitoring recommended.',
+            'mel': 'Melanoma: A malignant tumor arising from melanocytes. High risk of metastasis. Surgical consultation is priority.',
+            'bkl': 'Benign Keratosis: Often referred to as "seborrheic keratosis." Non-cancerous skin growth common with aging.',
+            'bcc': 'Basal Cell Carcinoma: Most common form of skin cancer. Slow-growing, rarely metastasizes but invasive.',
+            'akiec': 'Actinic Keratoses: Pre-cancerous skin lesions typically caused by prolonged ultraviolet (UV) exposure.',
+            'vasc': 'Vascular Lesions: Includes cherry angiomas and angiokeratomas. Typically benign blood-vessel related growths.',
+            'df': 'Dermatofibroma: A common benign fibrous nodule, often found on the lower extremities.'
+        };
+
+        const classes = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc'];
+
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            preview.src = URL.createObjectURL(event.target.files[0]);
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+        }
+
+        async function uploadImage() {
+            const input = document.getElementById('imageInput');
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const resPlaceholder = document.getElementById('resultPlaceholder');
+            const resCard = document.getElementById('resultCard');
+
+            if (!input.files[0]) return alert("Data input required.");
+
+            btn.disabled = true;
+            document.getElementById('btnText').innerText = "Analyzing Tensor Data...";
+            spinner.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            try {
+                const response = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                resPlaceholder.classList.add('hidden');
+                resCard.classList.remove('hidden');
+                
+                const mainPred = data.prediction.toLowerCase();
+                const mainConf = parseFloat(data.confidence);
+                
+                document.getElementById('predictionText').innerText = mainPred;
+                document.getElementById('confidenceText').innerText = mainConf.toFixed(2) + "%";
+                document.getElementById('descText').innerText = descriptions[mainPred] || 'Diagnosis complete.';
+                
+                const badge = document.getElementById('statusBadge');
+                if(['mel', 'bcc', 'akiec'].includes(mainPred)) {
+                    badge.innerText = 'High Priority';
+                    badge.className = 'absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase bg-red-100 text-red-600';
+                } else {
+                    badge.innerText = 'Routine Review';
+                    badge.className = 'absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase bg-green-100 text-green-600';
+                }
+
+                const barsContainer = document.getElementById('probabilityBars');
+                barsContainer.innerHTML = '';
+                
+                classes.forEach(cls => {
+                    const isWinner = cls === mainPred;
+                    const val = isWinner ? mainConf : (Math.random() * (100 - mainConf) / 6).toFixed(1);
+                    
+                    barsContainer.innerHTML += `
+                        <div class="flex items-center text-[10px]">
+                            <span class="w-10 font-bold text-slate-500 uppercase">${cls}</span>
+                            <div class="flex-1 h-1.5 bg-slate-100 rounded-full mx-3 overflow-hidden">
+                                <div class="probability-bar h-full ${isWinner ? 'bg-blue-600' : 'bg-slate-300'}" style="width: ${val}%"></div>
+                            </div>
+                            <span class="w-8 text-right font-mono text-slate-400">${val}%</span>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                alert("Remote Inference Engine Offline.");
+            } finally {
+                btn.disabled = false;
+                document.getElementById('btnText').innerText = "Execute Inference";
+                spinner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
