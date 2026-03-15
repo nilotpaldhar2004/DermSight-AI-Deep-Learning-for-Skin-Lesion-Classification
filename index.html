@@ -16,19 +16,32 @@
             animation: spin 1s linear infinite; display: inline-block;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Subtle pulse for the PRO badge */
+        .pulse-pro { animation: pulse-blue 2s infinite; }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
     </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-900 min-h-screen">
 
     <div class="max-w-6xl mx-auto px-6 py-10">
-        <nav class="flex justify-between items-center mb-12">
-            <div class="flex items-center space-x-2">
-                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl">D</div>
-                <span class="text-xl font-extrabold tracking-tight">DermSight <span class="text-blue-600">PRO</span></span>
+        <nav class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl pulse-pro">D</div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight">DermSight <span class="text-blue-600">PRO</span></span>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter leading-none mt-1">
+                        Neural Image Classifier & Lesion Analysis Engine
+                    </p>
+                </div>
             </div>
-            <div class="hidden md:flex space-x-6 text-sm font-semibold text-slate-500">
+            <div class="flex space-x-6 text-sm font-semibold text-slate-500">
                 <a href="#analysis-tool" class="hover:text-blue-600 transition">Analysis Tool</a>
-                <a href="https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification" target="_blank" class="hover:text-blue-600 transition">Source Code</a>
+                <a href="https://github.com/nilotpaldhar2004" target="_blank" class="hover:text-blue-600 transition">Source Code</a>
             </div>
         </nav>
 
@@ -63,9 +76,11 @@
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                <div id="resultPlaceholder" class="h-full flex flex-col items-center justify-center bg-white rounded-3xl border border-dashed border-slate-200 p-20 text-slate-400">
-                    <p class="text-sm">Awaiting input data for classification...</p>
+                <div id="resultPlaceholder" class="h-full flex flex-col items-center justify-center bg-white rounded-3xl border border-dashed border-slate-200 p-20 text-slate-400 text-center">
+                    <div class="mb-4 opacity-20 text-6xl">🔬</div>
+                    <p class="text-sm">Awaiting visual input for deep-layer classification...</p>
                 </div>
+                
                 <div id="resultCard" class="hidden space-y-6">
                     <div class="glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden">
                         <div id="statusBadge" class="absolute top-6 right-8 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
