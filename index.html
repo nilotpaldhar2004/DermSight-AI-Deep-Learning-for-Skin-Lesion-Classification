@@ -104,7 +104,7 @@
                     </div>
                     <div>
                         <h4 class="text-blue-600 font-bold text-sm uppercase tracking-wider mb-2">Preprocessing Pipeline</h4>
-                        <p class="text-slate-600 text-sm leading-relaxed">Images undergo a specific transformation pipeline: initial resizing to 224x224 pixels, conversion to Tensors, and normalization using ImageNet means ($\mu$) and standard deviations ($\sigma$) to ensure compatibility with pre-trained ResNet feature extractors.</p>
+                        <p class="text-slate-600 text-sm leading-relaxed">Images undergo a specific transformation pipeline: initial resizing to 224x224 pixels, conversion to Tensors, and normalization using ImageNet means ($\mu$) and standard deviations ($\sigma$).</p>
                     </div>
                 </div>
                 <div class="glass-panel p-6 rounded-3xl">
@@ -120,11 +120,11 @@
                         </div>
                         <div class="flex items-start space-x-3 text-xs">
                             <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">C</span>
-                            <p><strong>Color:</strong> Pigmentation is not uniform; shades of tan, brown, or black.</p>
+                            <p><strong>Color:</strong> Pigmentation is not uniform.</p>
                         </div>
                         <div class="flex items-start space-x-3 text-xs">
                             <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">D</span>
-                            <p><strong>Diameter:</strong> Lesion is greater than 6mm (size of a pencil eraser).</p>
+                            <p><strong>Diameter:</strong> Lesion is greater than 6mm.</p>
                         </div>
                     </div>
                 </div>
@@ -160,17 +160,13 @@
                     <p class="text-xl font-bold">FastAPI</p>
                 </div>
             </div>
-            
-            <div class="mt-12 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 font-mono text-[10px] space-y-2 opacity-80">
-                <p>> WEIGHTS_PATH: skin_lesion_resnet50_best.pth</p>
-                <p>> OPTIMIZER: Adam (lr=1e-4)</p>
-                <p>> DROPOUT_RATE: 0.2 | 0.1</p>
-                <p>> INFERENCE_LATENCY: < 200ms</p>
-            </div>
         </div>
     </div>
 
     <script>
+        // CHANGE THIS TO YOUR ACTUAL RENDER URL
+        const RENDER_URL = 'https://YOUR-APP-NAME.onrender.com';
+
         const descriptions = {
             'nv': 'Melanocytic Nevi: A benign neoplasm of melanocytes. Common in adult populations, regular monitoring recommended.',
             'mel': 'Melanoma: A malignant tumor arising from melanocytes. High risk of metastasis. Surgical consultation is priority.',
@@ -180,8 +176,6 @@
             'vasc': 'Vascular Lesions: Includes cherry angiomas and angiokeratomas. Typically benign blood-vessel related growths.',
             'df': 'Dermatofibroma: A common benign fibrous nodule, often found on the lower extremities.'
         };
-
-        const classes = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc'];
 
         function previewImage(event) {
             const preview = document.getElementById('preview');
@@ -208,7 +202,14 @@
             formData.append('file', input.files[0]);
 
             try {
-                const response = await fetch('/predict', { method: 'POST', body: formData });
+                // Pointing to Render instead of local path
+                const response = await fetch(`${RENDER_URL}/predict`, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                if (!response.ok) throw new Error("Server Error");
+                
                 const data = await response.json();
                 
                 resPlaceholder.classList.add('hidden');
@@ -233,9 +234,11 @@
                 const barsContainer = document.getElementById('probabilityBars');
                 barsContainer.innerHTML = '';
                 
-                classes.forEach(cls => {
-                    const isWinner = cls === mainPred;
-                    const val = isWinner ? mainConf : (Math.random() * (100 - mainConf) / 6).toFixed(1);
+                // Use REAL probabilities from our updated main.py
+                const all_probs = data.all_probabilities;
+                Object.keys(all_probs).forEach(cls => {
+                    const val = all_probs[cls].toFixed(1);
+                    const isWinner = cls.toLowerCase() === mainPred;
                     
                     barsContainer.innerHTML += `
                         <div class="flex items-center text-[10px]">
@@ -249,7 +252,8 @@
                 });
 
             } catch (error) {
-                alert("Remote Inference Engine Offline.");
+                console.error(error);
+                alert("Remote Inference Engine Offline. Please ensure the Render server is awake.");
             } finally {
                 btn.disabled = false;
                 document.getElementById('btnText').innerText = "Execute Inference";
@@ -259,3 +263,5 @@
     </script>
 </body>
 </html>
+
+
