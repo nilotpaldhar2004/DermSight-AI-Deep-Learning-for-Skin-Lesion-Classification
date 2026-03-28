@@ -56,5 +56,5 @@ The engine classifies images into seven specific classes based on the Internatio
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git](https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git)
+git clone https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git
 cd DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification
