@@ -52,9 +52,24 @@ The engine classifies images into seven specific classes based on the Internatio
 
 ---
 
-## 🚀 Installation & Local Setup
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git
-cd DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification
+## 🚀 Installation & Local Setup
+      git clone https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git
+      cd DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification
+      pip install -r requirements.txt
+      uvicorn main:app --reload
+
+## 📈 Project Insights
+
+<p align="center">
+  <a href="https://star-history.com/#nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification&Date">
+    <img src="https://api.star-history.com/svg?repos=nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification&theme=dark" alt="Star History Chart" width="600"/>
+  </a>
+</p>
+## 🔹 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+---
+
+Developed by Nilotpal Dhar • March 2026
