@@ -68,6 +68,8 @@ The engine classifies images into seven specific classes based on the Internatio
 </p>
 
 ---
+## ⚠️ Medical Disclaimer
+This application is developed for educational and research purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
 
 ## 🔹 License
 
