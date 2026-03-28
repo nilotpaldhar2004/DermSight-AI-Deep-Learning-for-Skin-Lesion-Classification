@@ -66,6 +66,9 @@ The engine classifies images into seven specific classes based on the Internatio
     <img src="https://api.star-history.com/svg?repos=nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification&theme=dark" alt="Star History Chart" width="600"/>
   </a>
 </p>
+
+---
+
 ## 🔹 License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
