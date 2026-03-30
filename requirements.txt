@@ -1,8 +1,21 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch
-torchvision
-fastapi
-uvicorn
-python-multipart
-pillow
-numpy
+
+# ── PyTorch (CPU-only build — mandatory for Render free tier) ──────────────────
+# DO NOT remove the --extra-index-url line above or change to the default index.
+# The default PyPI torch package includes CUDA and is ~2GB — it will OOM on Render.
+# This CPU build is ~200MB and fits within the 512MB RAM limit.
+torch==2.2.2+cpu
+torchvision==0.17.2+cpu
+
+# ── API framework ──────────────────────────────────────────────────────────────
+fastapi==0.115.0
+uvicorn==0.32.0
+
+# ── File upload support — REQUIRED for FastAPI File() uploads ──────────────────
+python-multipart==0.0.9
+
+# ── Image processing ───────────────────────────────────────────────────────────
+pillow==10.4.0
+
+# ── Data handling ──────────────────────────────────────────────────────────────
+numpy==1.26.4
