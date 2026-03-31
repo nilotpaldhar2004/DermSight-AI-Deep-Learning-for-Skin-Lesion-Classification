@@ -1,4 +1,4 @@
-# ── IDE & Editor ──────────────────────────────────────────────────────────────
+# IDE & Editor 
 .idea/
 *.iws
 *.iml
@@ -7,23 +7,22 @@ out/
 .vscode/
 *.swp
 
-# ── Python Cache ───────────────────────────────────────────────────────────────
+# Python Cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyo
 
-# ── Virtual Environments ───────────────────────────────────────────────────────
+# Virtual Environments 
 venv/
 env/
 .env
 .venv/
 
-# ── Jupyter Notebook ───────────────────────────────────────────────────────────
+# Jupyter Notebook 
 .ipynb_checkpoints/
 
-# ── ML Model & Weight Files (large binaries — never commit to Git) ─────────────
-# Store these on Render Disk or share via Google Drive / Hugging Face Hub
+# ML Model & Weight Files 
 *.pth
 *.pt
 *.ckpt
@@ -36,7 +35,7 @@ env/
 *.safetensors
 
 
-# ── Datasets ───────────────────────────────────────────────────────────────────
+# Datasets
 *.csv
 *.xlsx
 *.zip
@@ -44,7 +43,7 @@ env/
 data/
 datasets/
 
-# ── Logs ───────────────────────────────────────────────────────────────────────
+# Logs
 *.log
 logs/
 
