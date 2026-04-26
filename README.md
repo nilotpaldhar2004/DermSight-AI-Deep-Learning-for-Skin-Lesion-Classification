@@ -1,3 +1,14 @@
+---
+title: Deep Learning For Skin Lesion Classification
+emoji: 🔬
+colorFrom: teal
+colorTo: blue
+sdk: docker
+app_file: main.py
+pinned: false
+license: mit
+---
+
 # 🔬 DermSight PRO — Deep Residual Learning for Skin Lesion Classification
 
 <div align="center">
@@ -6,21 +17,36 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.2-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![ResNet-50](https://img.shields.io/badge/Model-ResNet--50-blue?style=flat-square)
-![Dataset](https://img.shields.io/badge/Dataset-HAM10000-orange?style=flat-square)
+![Dataset](https://img.shields.io/badge/Dataset-HAM10000+ISIC2019-orange?style=flat-square)
+![Accuracy](https://img.shields.io/badge/Val_Accuracy-82.6%25-green?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Live-brightgreen?style=flat-square)
 
 **A production-grade computer vision application that classifies dermoscopic skin images into 7 ISIC diagnostic categories using a fine-tuned ResNet-50 architecture.**
 
-[Live Demo](https://nilotpaldhar2004.github.io/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification/) · [API Docs](https://dermsight-ai-deep-learning-for-skin.onrender.com/docs) · [Report an Issue](https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification/issues)
+[🚀 Live Demo](https://nilotpaldhar2004-deep-learning-for-skin-lesion-classification.hf.space) · [📖 API Docs](https://nilotpaldhar2004-deep-learning-for-skin-lesion-classification.hf.space/docs) · [💻 GitHub](https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification)
 
 </div>
 
 ---
 
-## 📸 What it does
+## 📸 What It Does
 
 Upload any dermoscopic image and the model returns an instant probability distribution across all 7 ISIC diagnostic classes — complete with a confidence dial, color-coded risk classification (Malignant / Pre-cancerous / Benign), clinical descriptions, and a downloadable analysis report.
+
+---
+
+## 📊 Model Performance
+
+| Metric | Value |
+|---|---|
+| Validation Accuracy | **82.6%** (held-out val set) |
+| Best Epoch | 20 / 20 |
+| Val Loss | 0.827 |
+| Training Images | 25,331 (combined) |
+| Classes | 7 ISIC categories |
+
+> Accuracy measured on a **held-out validation set** — not the training set. This is the honest number.
 
 ---
 
@@ -28,12 +54,11 @@ Upload any dermoscopic image and the model returns an instant probability distri
 
 - **Real-Time Inference** — ResNet-50 classification in under 500ms per image
 - **7-Class ISIC Coverage** — MEL, BCC, AKIEC, BKL, NV, DF, VASC
-- **FP16 Inference** — Half-precision model fits within Render's 512MB free-tier RAM
+- **FP16 Inference** — Half-precision model fits within free-tier RAM limits
 - **Confidence Dial** — Animated SVG arc gauge with risk-level color coding
 - **Clinical Descriptions** — Per-class pathology notes with urgency classification
 - **Downloadable Report** — Structured `.txt` report with all probabilities and clinical notes
-- **Keep-Alive Endpoint** — `/ping` prevents Render cold-start delays
-- **Responsive UI** — Works cleanly on mobile, tablet, and desktop
+- **Responsive UI** — Works on mobile, tablet, and desktop
 
 ---
 
@@ -41,18 +66,36 @@ Upload any dermoscopic image and the model returns an instant probability distri
 
 | Component | Detail |
 |---|---|
-| Backbone | ResNet-50 (ImageNet pre-trained) |
-| Classifier Head | Linear(2048→1024) → ReLU → Dropout(0.2) → Linear(1024→512) → ReLU → Dropout(0.1) → Linear(512→128) → ReLU → Linear(128→7) |
+| Backbone | ResNet-50 (ImageNet pre-trained, IMAGENET1K_V2) |
+| Fine-tuned layers | Layer 3 + Layer 4 (not just the head) |
+| Classifier Head | Linear(2048→1024) → BatchNorm1d → ReLU → Dropout(0.4) → Linear(1024→512) → ReLU → Dropout(0.3) → Linear(512→128) → ReLU → Linear(128→7) |
 | Input Resolution | 224 × 224 px |
-| Normalisation | μ = [0.485, 0.456, 0.406] · σ = [0.229, 0.224, 0.225] (ImageNet) |
+| Normalisation | μ = [0.485, 0.456, 0.406]  σ = [0.229, 0.224, 0.225] (ImageNet) |
 | Precision | FP16 (Half Precision) |
-| Loss Function | Weighted Cross-Entropy (compensates for 10:1 class imbalance) |
+| Loss Function | Weighted Cross-Entropy (class weights from sklearn.utils.class_weight) |
+| Optimizer | AdamW (backbone lr=1e-5, head lr=1e-4, weight_decay=1e-4) |
+| Scheduler | CosineAnnealingLR (T_max=20) |
 
 ### Why ResNet-50?
 
-Traditional deep CNNs degrade with depth due to the **vanishing gradient problem**. ResNet-50 solves this with **residual (skip) connections** that allow gradients to propagate directly to earlier layers. This enables training of much deeper networks without performance degradation — making it ideal for learning fine-grained dermoscopic patterns.
+Traditional deep CNNs degrade with depth due to the **vanishing gradient problem**. ResNet-50 solves this with **residual (skip) connections** that allow gradients to propagate directly to earlier layers — making it ideal for learning fine-grained dermoscopic patterns.
 
-**Transfer Learning:** ImageNet weights provide strong low-level feature priors (edges, textures) which are repurposed for lesion morphology. Only the classifier head was trained from scratch; the convolutional backbone was fine-tuned at a reduced learning rate.
+**Transfer Learning:** ImageNet weights provide strong low-level feature priors (edges, textures) which are repurposed for lesion morphology.
+
+---
+
+## 📦 Dataset
+
+| Dataset | Images | Classes |
+|---|---|---|
+| HAM10000 (ISIC Archive) | 10,015 | 7 |
+| ISIC 2019 (unique only) | 15,316 | 7 |
+| **Combined Total** | **25,331** | **7** |
+
+**Class imbalance fixes applied:**
+- WeightedRandomSampler — every batch sees all 7 classes equally
+- Weighted CrossEntropyLoss — minority class losses count proportionally more
+- Strong augmentation — RandomRotation(30), ColorJitter, RandomAffine, RandomPerspective
 
 ---
 
@@ -75,11 +118,12 @@ Traditional deep CNNs degrade with depth due to the **vanishing gradient problem
 | Layer | Technology |
 |---|---|
 | Deep Learning | PyTorch 2.2, torchvision, ResNet-50 |
-| Training | HAM10000 Dataset (10,015 dermoscopic images) |
+| Training | HAM10000 + ISIC 2019 combined (25,331 images), Kaggle GPU T4 |
 | Backend API | FastAPI, Uvicorn, Python-Multipart |
 | Image Processing | Pillow, NumPy |
 | Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Deployment | Render (API) + GitHub Pages (Frontend) |
+| Deployment | HuggingFace Spaces (Docker SDK) |
+| CI/CD | GitHub Actions — auto-deploy on push to main |
 
 ---
 
@@ -88,116 +132,54 @@ Traditional deep CNNs degrade with depth due to the **vanishing gradient problem
 ```
 DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification/
 │
-├── main.py                                              # FastAPI backend server
-├── index.html                                           # Frontend dashboard
-├── Skin Lesion Classifier [USE ResNet-50] & Analysis.ipynb  # Training notebook
-├── requirements.txt                                     # Python dependencies
-├── LICENSE.txt                                          # MIT License
-├── .gitignore                                           # Git ignore rules
-├── README.md                                            # Project documentation
+├── main.py                          # FastAPI backend (port 7860 for HF Spaces)
+├── index.html                       # Frontend dashboard
+├── Dockerfile                       # HuggingFace Spaces deployment
+├── requirements.txt                 # Python dependencies (CPU-only torch)
+├── LICENSE                          # MIT License
+├── .gitignore                       # Git ignore rules
+├── README.md                        # This file
 │
-└── (gitignored — not committed to repo)
-    ├── skin_lesion_resnet50_best.pth                    # Trained model weights (~52MB FP16)
-    └── classes.npy                                      # Class label array
+├── .github/workflows/
+│   └── deploy.yml                   # Auto-deploy to HF Spaces on git push
+│
+├── Skin Lesion Classifier [USE ResNet-50] & Analysis.ipynb  # Training notebook
+│
+└── (uploaded directly to HF Space — not in git)
+    ├── skin_lesion_resnet50_best.pth    # Trained model weights (~52MB FP16)
+    └── classes.npy                      # Class label array
 ```
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.10 or higher
-- ~1GB disk space for PyTorch CPU install
-
-### 1. Clone the repository
+## 🚀 Run Locally
 
 ```bash
 git clone https://github.com/nilotpaldhar2004/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification.git
 cd DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification
-```
 
-### 2. Create a virtual environment and install dependencies
-
-```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
 
-### 3. Add model files
+# Add model files to project root:
+# skin_lesion_resnet50_best.pth
+# classes.npy
 
-Place these two files in the project root (same directory as `main.py`):
-
-```
-skin_lesion_resnet50_best.pth   ← trained model weights
-classes.npy                     ← class label array
-```
-
-> **Don't have the model?** Run the Jupyter notebook `Skin Lesion Classifier [USE ResNet-50] & Analysis.ipynb` from start to finish — it trains and saves both files automatically.
-
-### 4. Start the server
-
-```bash
 python main.py
+# Open http://localhost:7860
 ```
-
-Open `http://localhost:8000` — FastAPI serves `index.html` directly.
-
----
-
-## 🌐 Deployment
-
-| Component | Host | URL |
-|---|---|---|
-| Frontend (`index.html`) | GitHub Pages | `https://nilotpaldhar2004.github.io/DermSight-AI-Deep-Learning-for-Skin-Lesion-Classification/` |
-| Backend (`main.py`) | Render | `https://dermsight-ai-deep-learning-for-skin.onrender.com` |
-
-### Deploy to Render
-
-> ⚠️ **Critical:** The `requirements.txt` uses `--extra-index-url https://download.pytorch.org/whl/cpu` to install the CPU-only PyTorch build. **Do not remove this line.** The default PyPI torch package includes CUDA and is ~2GB — it will exceed Render's free-tier limits and fail to deploy.
-
-1. Push your code to GitHub (model `.pth` and `classes.npy` are gitignored — upload them separately)
-2. In Render: **New → Web Service → connect your GitHub repo**
-3. **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. **Environment:** Python 3
-5. For the model files, use Render **Disk** (persistent storage) or upload them as part of a Dockerfile
-
-> **Keep-alive tip:** Create a free UptimeRobot monitor pointing at `https://your-app.onrender.com/ping` every 10 minutes to prevent cold-start delays on the free tier.
-
-### Deploy frontend to GitHub Pages
-
-1. **Settings → Pages → Source → main branch → / (root)**
-2. GitHub Pages will serve `index.html` within ~60 seconds
 
 ---
 
 ## 📡 API Reference
 
 ### `GET /health`
-
 ```json
-{
-  "status": "ok",
-  "model_loaded": true,
-  "classes_loaded": true,
-  "version": "2.0.0"
-}
-```
-
-### `GET /ping`
-
-```json
-{ "pong": true }
+{ "status": "ok", "model_loaded": true, "classes_loaded": true, "version": "3.0.0" }
 ```
 
 ### `POST /predict`
-
-Accepts a `multipart/form-data` request with an image file in the `file` field.
-
-**cURL example:**
 ```bash
-curl -X POST https://dermsight-ai-deep-learning-for-skin.onrender.com/predict \
+curl -X POST https://nilotpaldhar2004-deep-learning-for-skin-lesion-classification.hf.space/predict \
   -F "file=@your_image.jpg"
 ```
 
@@ -207,40 +189,33 @@ curl -X POST https://dermsight-ai-deep-learning-for-skin.onrender.com/predict \
   "prediction": "mel",
   "confidence": "84.27",
   "all_probabilities": {
-    "mel":   84.27,
-    "nv":     8.12,
-    "bkl":    3.45,
-    "bcc":    2.11,
-    "akiec":  1.20,
-    "vasc":   0.55,
-    "df":     0.30
+    "mel": 84.27, "nv": 8.12, "bkl": 3.45,
+    "bcc": 2.11, "akiec": 1.20, "vasc": 0.55, "df": 0.30
   },
   "latency_ms": 312.5
 }
 ```
 
-Full interactive documentation is available at `/docs` (Swagger UI) when the server is running.
+Full Swagger docs: `/docs`
 
 ---
 
 ## ⚕️ Medical Disclaimer
 
-This application is developed for **educational and research purposes only**. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. The model's predictions should not be used as the basis for any clinical decision. Always consult a qualified dermatologist for the assessment of skin lesions.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
+This application is developed for **educational and research purposes only**. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified dermatologist for assessment of skin lesions.
 
 ---
 
 ## 👤 Author
 
-**Nilotpal Dhar** · [@nilotpaldhar2004](https://github.com/nilotpaldhar2004) · March 2026
+**Nilotpal Dhar** — CS student, AI/ML enthusiast
+
+[![GitHub](https://img.shields.io/badge/GitHub-nilotpaldhar2004-black?style=flat&logo=github)](https://github.com/nilotpaldhar2004)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-nilotpaldhar2004-orange?style=flat)](https://huggingface.co/nilotpaldhar2004)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-nilotpal--dhar-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/nilotpal-dhar-24b304294/)
 
 ---
 
 <div align="center">
-  <sub>Built with PyTorch, FastAPI, and ResNet-50 · Dataset: HAM10000 (ISIC Archive) · Deployed on Render + GitHub Pages</sub>
+  <sub>Built with PyTorch, FastAPI, and ResNet-50 · Dataset: HAM10000 + ISIC 2019 · Deployed on HuggingFace Spaces via Docker + GitHub Actions CI/CD</sub>
 </div>
