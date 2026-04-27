@@ -15,31 +15,34 @@ jobs:
 
       - name: Push to HuggingFace Space
         env:
-          # FIXED: Corrected the secret name to HF_TOKEN
-          HF_TOKEN: ${{ secrets.HF_TOKEN }} 
+          # Using your specific secret name
+          HF_TOKEN: ${{ secrets.HF_TOKENG }} 
         run: |
           git config --global user.email "dharnilotpal31@gmail.com"
           git config --global user.name "nilotpaldhar2004"
 
-          # Clone the space (using the token for authentication)
+          # Use the Token directly in the clone URL to bypass the password prompt
           git clone https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification hf_space
 
-          # Copy app files
+          # Copy app files from your GitHub repo to the cloned space folder
           cp main.py hf_space/
           cp index.html hf_space/
           cp requirements.txt hf_space/
           
-          # FIXED: Copying 'Docker' as per your recent rename
+          # IMPORTANT: HuggingFace MUST see the name 'Dockerfile' to build.
+          # We take your file 'Docker' and rename it during the copy.
           cp Docker hf_space/Dockerfile 
 
-          # FIXED: Corrected model name to match your saved file from training
+          # Copy model files if they exist
           [ -f classes.npy ] && cp classes.npy hf_space/
           [ -f best_resnet50_skin.pth ] && cp best_resnet50_skin.pth hf_space/
 
           cd hf_space
           git add .
           
-          # Only commit if there are changes to avoid workflow errors
+          # Commit and Push
           git diff --cached --quiet || git commit -m "Auto deploy from GitHub: version 3.0.0"
           
+          # Re-verify the remote URL with the token before pushing
+          git remote set-url origin https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
           git push origin main
