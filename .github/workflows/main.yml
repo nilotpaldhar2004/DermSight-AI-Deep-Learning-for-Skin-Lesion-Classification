@@ -1,31 +1,44 @@
-name: Sync to Hugging Face Spaces
+name: Deploy to HuggingFace Spaces
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          lfs: true
 
-      - name: Push to Hugging Face
+      - name: Push to HuggingFace Space
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKENG }}
+          # Using your specific secret name
+          HF_TOKEN: ${{ secrets.HF_TOKENG }} 
         run: |
-          # 1. Setup credentials
           git config --global user.email "dharnilotpal31@gmail.com"
-          git config --global user.name "Nilotpal Dhar"
+          git config --global user.name "nilotpaldhar2004"
+
+          # Use the Token directly in the clone URL to bypass the password prompt
+          git clone https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification hf_space
+
+          # Copy app files from your GitHub repo to the cloned space folder
+          cp main.py hf_space/
+          cp index.html hf_space/
+          cp requirements.txt hf_space/
           
-          # 2. Add Hugging Face as a SECOND remote called 'hf'
-          # This keeps 'origin' pointing to GitHub and 'hf' pointing to Spaces
-          git remote add hf https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
+          # IMPORTANT: HuggingFace MUST see the name 'Dockerfile' to build.
+          # We take your file 'Docker' and rename it during the copy.
+          cp Docker hf_space/Dockerfile 
+
+          cd hf_space
+          git add .
           
-          # 3. Force push the main branch to Hugging Face
-          # Note: We push the local 'main' branch to the remote 'main' branch
-          git push --force hf main
+          # Commit and Push
+          git diff --cached --quiet || git commit -m "Auto deploy from GitHub: version 3.0.0"
+          
+          # Re-verify the remote URL with the token before pushing
+          git remote set-url origin https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
+          git push origin main
