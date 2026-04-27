@@ -109,19 +109,20 @@ async def predict(file: UploadFile = File(...)):
             probs = torch.nn.functional.softmax(outputs[0], dim=0)
             conf, idx = torch.max(probs, 0)
 
-        # Better for medical UI: Return ALL probabilities
+        # FORCE keys to lowercase so JavaScript 'mel' always matches
         all_probabilities = {
-            str(classes[i]): round(float(probs[i]) * 100, 2)
+            str(classes[i]).lower(): round(float(probs[i]) * 100, 2)
             for i in range(len(classes))
         }
 
         return {
-            "prediction": str(classes[idx.item()]),
+            "prediction": str(classes[idx.item()]), # Keeping display name as is
             "confidence": f"{conf.item()*100:.2f}%",
             "all_probabilities": all_probabilities,
             "latency_ms": round((time.perf_counter() - t0) * 1000, 2)
         }
     except Exception as e:
+        logger.error(f"Prediction error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
