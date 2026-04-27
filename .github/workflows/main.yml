@@ -21,24 +21,17 @@ jobs:
           git config --global user.name "nilotpaldhar2004"
 
           # 1. Clone the HuggingFace Space
-          git clone https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification hf_space
+          git clone https://huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification hf_space
 
-          # 2. Copy files from your GitHub repo to the Space folder
-          cp main.py hf_space/
-          cp index.html hf_space/
-          cp requirements.txt hf_space/
-          
-          # FIXED: Changed 'Docker' to 'Dockerfile' to match your actual file name
-          cp Dockerfile hf_space/Dockerfile 
+          # 2. Copy EVERYTHING from GitHub to the Space (except the .git folder)
+          # The '.' refers to your GitHub Repo root.
+          # This will now include your .gitignore and .ipynb files automatically.
+          rsync -av --exclude='.git' --exclude='hf_space' ./ hf_space/
 
-          # 3. Handle model files (optional but recommended)
-          [ -f classes.npy ] && cp classes.npy hf_space/
-          [ -f best_resnet50_skin.pth ] && cp best_resnet50_skin.pth hf_space/
-
-          # 4. Commit and Push to HuggingFace
+          # 3. Commit and Push to HuggingFace
           cd hf_space
           git add .
-          git diff --cached --quiet || git commit -m "Auto deploy from GitHub: version 3.0.0"
+          git diff --cached --quiet || git commit -m "Auto deploy all files including notebooks and gitignore"
           
           git remote set-url origin https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
           git push origin main
