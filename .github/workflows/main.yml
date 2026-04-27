@@ -3,7 +3,6 @@ name: Sync to Hugging Face Spaces
 on:
   push:
     branches: [main]
-
   workflow_dispatch:
 
 jobs:
@@ -19,10 +18,14 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKENG }}
         run: |
-          
+          # 1. Setup credentials
           git config --global user.email "dharnilotpal31@gmail.com"
           git config --global user.name "Nilotpal Dhar"
           
-          git remote set-url origin https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
+          # 2. Add Hugging Face as a SECOND remote called 'hf'
+          # This keeps 'origin' pointing to GitHub and 'hf' pointing to Spaces
+          git remote add hf https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
           
+          # 3. Force push the main branch to Hugging Face
+          # Note: We push the local 'main' branch to the remote 'main' branch
           git push --force hf main
