@@ -1,17 +1,11 @@
 # IDE & Editor 
 .idea/
-*.iws
-*.iml
-*.ipr
-out/
 .vscode/
 *.swp
 
 # Python Cache
 __pycache__/
 *.py[cod]
-*$py.class
-*.pyo
 
 # Virtual Environments 
 venv/
@@ -25,29 +19,19 @@ env/
 # ML Model & Weight Files 
 *.pth
 *.pt
-*.ckpt
 *.pkl
-*.pickle
-*.joblib
-*.h5
-*.hdf5
-*.onnx
-*.safetensors
 
 
-# Datasets
+# Datasets (Keep these ignored, they are too big for GitHub)
 *.csv
 *.xlsx
 *.zip
-*.tar.gz
 data/
 datasets/
 
 # Logs
 *.log
-logs/
 
-# ── OS Generated ───────────────────────────────────────────────────────────────
+# OS Generated
 .DS_Store
 Thumbs.db
-desktop.ini
