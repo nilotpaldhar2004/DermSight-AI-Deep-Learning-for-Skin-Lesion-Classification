@@ -1071,52 +1071,53 @@
   }
 
   // ── Show result ───────────────────────────────────────────────
-  function showResult(data) {
+ function showResult(data) {
     const pred = data.prediction.toLowerCase();
     const conf = parseFloat(data.confidence);
-    const risk = riskMap[pred] || { level: 'Unknown', cls: 'normal', risk: 'UNKNOWN', barCls: '' };
+    const risk = riskMap[pred] || { level: 'Unknown', cls: 'normal', risk: 'LOW', barCls: '' };
     const desc = descriptions[pred] || 'Classification complete.';
 
-    // Dial
-    setDial(conf, risk.cls);
+    // 1. RISK OVERRIDE LOGIC
+    // If the combined probability of MEL + BCC is high, we elevate the warning even if NV is the winner.
+    const malignantProb = (data.all_probabilities['mel'] || 0) + (data.all_probabilities['bcc'] || 0);
+    let displayRiskLevel = risk.risk;
+    let displayRiskCls = risk.cls;
+    let displayBadgeText = risk.level;
 
-    // Verdict badge
+    if (malignantProb > 20 && pred === 'nv') {
+        displayRiskLevel = 'ELEVATED';
+        displayRiskCls = 'caution';
+        displayBadgeText = 'Review Required';
+    }
+
+    // 2. Update UI Elements
+    setDial(conf, displayRiskCls);
+
     const badge = document.getElementById('verdictBadge');
-    badge.className = `verdict-badge ${risk.cls}`;
-    document.getElementById('badgeText').textContent = risk.level;
+    badge.className = `verdict-badge ${displayRiskCls}`;
+    document.getElementById('badgeText').textContent = displayBadgeText;
 
-    // Verdict name + code
     document.getElementById('verdictName').textContent = data.prediction.toUpperCase();
-    document.getElementById('verdictCode').textContent = `/ ${pred.toUpperCase()} · ${risk.risk} RISK`;
-
-    // Description
+    document.getElementById('verdictCode').textContent = `/ ${pred.toUpperCase()} · ${displayRiskLevel} RISK`;
     document.getElementById('descText').textContent = desc;
 
-    // Stats
     document.getElementById('statPred').textContent = data.prediction.toUpperCase();
     document.getElementById('statConf').textContent = conf.toFixed(1) + '%';
+    
     const riskEl = document.getElementById('statRisk');
-    riskEl.textContent = risk.risk;
-    riskEl.style.color =
-      risk.cls === 'urgent'  ? 'var(--rose)'  :
-      risk.cls === 'caution' ? 'var(--amber)' :
-                               'var(--green)';
+    riskEl.textContent = displayRiskLevel;
+    riskEl.style.color = displayRiskCls === 'urgent' ? 'var(--rose)' : (displayRiskCls === 'caution' ? 'var(--amber)' : 'var(--green)');
 
-    // Card tag
-    document.getElementById('resultTag').textContent =
-      risk.cls === 'urgent' ? '⚠ PRIORITY' : '✓ ROUTINE';
+    document.getElementById('resultTag').textContent = displayRiskCls === 'urgent' ? '⚠ PRIORITY' : (displayRiskCls === 'caution' ? '⚠ REVIEW' : '✓ ROUTINE');
 
-    // Probability bars
+    // 3. Probability bars (Sorted)
     const container = document.getElementById('probBars');
     container.innerHTML = '';
-
-    // Sort by probability descending for cleaner readout
-    const sorted = Object.entries(data.all_probabilities)
-      .sort(([,a],[,b]) => parseFloat(b) - parseFloat(a));
+    const sorted = Object.entries(data.all_probabilities).sort(([,a],[,b]) => b - a);
 
     sorted.forEach(([cls, val]) => {
       const pctVal = parseFloat(val).toFixed(1);
-      const isWin  = cls.toLowerCase() === pred;
+      const isWin = cls.toLowerCase() === pred;
       const winRisk = riskMap[cls.toLowerCase()] || {};
       const barExtraCls = isWin ? ` winner` : (winRisk.barCls ? ` ${winRisk.barCls}` : '');
 
@@ -1133,16 +1134,12 @@
       container.appendChild(item);
     });
 
-    // Show result
-    document.getElementById('resultIdle').style.display    = 'none';
+    document.getElementById('resultIdle').style.display = 'none';
     document.getElementById('resultContent').style.display = 'block';
 
-    // Animate bars
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        container.querySelectorAll('.prob-bar-fill').forEach(el => {
-          el.style.width = el.dataset.width;
-        });
+        container.querySelectorAll('.prob-bar-fill').forEach(el => { el.style.width = el.dataset.width; });
       });
     });
   }
