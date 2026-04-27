@@ -25,7 +25,7 @@ jobs:
           cp main.py hf_space/
           cp index.html hf_space/
           cp requirements.txt hf_space/
-          cp Dockerfile hf_space/
+          cp Docker hf_space/
 
           [ -f classes.npy ] && cp classes.npy hf_space/
           [ -f skin_lesion_resnet50_best.pth ] && cp skin_lesion_resnet50_best.pth hf_space/
