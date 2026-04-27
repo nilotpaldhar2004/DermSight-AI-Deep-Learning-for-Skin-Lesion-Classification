@@ -20,15 +20,13 @@ jobs:
           git config --global user.email "dharnilotpal31@gmail.com"
           git config --global user.name "nilotpaldhar2004"
 
-          git clone https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification
+          git clone https://nilotpaldhar2004:${HF_TOKEN}@huggingface.co/spaces/nilotpaldhar2004/Deep-Learning-for-Skin-Lesion-Classification hf_space
 
           cp main.py hf_space/
           cp index.html hf_space/
           cp requirements.txt hf_space/
           cp Dockerfile hf_space/
 
-          # Model files — only copy if they exist in repo
-          # (they may be gitignored and uploaded manually to HF Space)
           [ -f classes.npy ] && cp classes.npy hf_space/
           [ -f skin_lesion_resnet50_best.pth ] && cp skin_lesion_resnet50_best.pth hf_space/
 
